@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Animations with Persistence</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            transition: background-color 0.5s ease;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .animated-box {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
+            margin: 2rem auto;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .animated-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .animated-box.active {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 126, 95, 0.7);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(255, 126, 95, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 126, 95, 0);
+            }
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-selector {
+            margin-top: 1rem;
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .preference-display {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive Animations Demo</h1>
+        
+        <div class="animated-box" id="animBox">
+            Click Me!
+        </div>
+        
+        <button class="btn" id="toggleBtn">Toggle Animation</button>
+        
+        <div class="theme-selector">
+            <label for="theme">Choose a theme:</label>
+            <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="blue">Blue</option>
+            </select>
+        </div>
+        
+        <div class="preference-display" id="prefDisplay">
+            Your preferences will appear here
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const animBox = document.getElementById('animBox');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const themeSelect = document.getElementById('theme');
+        const prefDisplay = document.getElementById('prefDisplay');
+        const body = document.body;
+
+        // Load preferences from localStorage
+        function loadPreferences() {
+            // Get animation state or default to false
+            const isAnimating = localStorage.getItem('animationActive') === 'true';
+            if (isAnimating) {
+                animBox.classList.add('active');
+                toggleBtn.textContent = 'Stop Animation';
+            }
+            
+            // Get theme preference or default to light
+            const theme = localStorage.getItem('theme') || 'light';
+            themeSelect.value = theme;
+            applyTheme(theme);
+            
+            // Update preferences display
+            updatePreferenceDisplay();
+        }
+
+        // Save animation state to localStorage
+        function toggleAnimation() {
+            animBox.classList.toggle('active');
+            const isAnimating = animBox.classList.contains('active');
+            localStorage.setItem('animationActive', isAnimating);
+            toggleBtn.textContent = isAnimating ? 'Stop Animation' : 'Start Animation';
+            updatePreferenceDisplay();
+        }
+
+        // Apply selected theme
+        function applyTheme(theme) {
+            // Remove all theme classes first
+            body.classList.remove('light-theme', 'dark-theme', 'blue-theme');
+            
+            // Add the selected theme class
+            switch(theme) {
+                case 'dark':
+                    body.classList.add('dark-theme');
+                    body.style.backgroundColor = '#333';
+                    break;
+                case 'blue':
+                    body.classList.add('blue-theme');
+                    body.style.backgroundColor = '#e6f2ff';
+                    break;
+                default: // light
+                    body.classList.add('light-theme');
+                    body.style.backgroundColor = '#f5f5f5';
+            }
+        }
+
+        // Handle theme change
+        function handleThemeChange() {
+            const theme = themeSelect.value;
+            localStorage.setItem('theme', theme);
+            applyTheme(theme);
+            updatePreferenceDisplay();
+        }
+
+        // Update preferences display
+        function updatePreferenceDisplay() {
+            const isAnimating = localStorage.getItem('animationActive') === 'true';
+            const theme = localStorage.getItem('theme') || 'light';
+            
+            prefDisplay.textContent = `Current Preferences:
+- Animation: ${isAnimating ? 'Active' : 'Inactive'}
+- Theme: ${theme}`;
+        }
+
+        // Add bounce animation on click
+        function addBounceEffect() {
+            animBox.style.animation = 'none';
+            void animBox.offsetWidth; // Trigger reflow
+            animBox.style.animation = 'bounce 0.5s ease';
+            
+            // Remove the animation after it completes
+            setTimeout(() => {
+                animBox.style.animation = '';
+            }, 500);
+        }
+
+        // Event Listeners
+        toggleBtn.addEventListener('click', toggleAnimation);
+        themeSelect.addEventListener('change', handleThemeChange);
+        
+        animBox.addEventListener('click', function() {
+            if (!animBox.classList.contains('active')) {
+                addBounceEffect();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadPreferences);
+
+        // Add bounce keyframes dynamically
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-20px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
